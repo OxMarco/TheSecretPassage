@@ -13,6 +13,7 @@ export default class Header extends Component {
                             <ul className="custom-menu">
                                 <li><Link to="/home">Home</Link></li>
                                 <li><Link to="/dashboard">Dashboard</Link></li>
+                                <li><Link to="/mint">Mint</Link></li>
                             </ul>
                         </div>
                     </div>

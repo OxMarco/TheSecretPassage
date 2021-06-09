@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import { Link } from "react-router-dom";
 import {
         FacebookShareButton,
         FacebookShareCount,
@@ -102,7 +101,7 @@ export default class Info extends Component {
                                             <p className="mb-4"><span className="text-muted">{this.state.nft.subtitle}</span></p>
 
                                             <div className="mb-5">
-                                                <p>{this.state.nft.symbol}</p>
+                                                <p>{this.state.nft.description}</p>
                                             </div>
 
                                             <h4 className="h4 mb-3">Properties</h4>

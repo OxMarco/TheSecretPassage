@@ -5,6 +5,7 @@ import IpfsRouter from 'ipfs-react-router'
 import Home from './pages/home/home';
 import Dashboard from './pages/dashboard/dashboard';
 import Info from './pages/info/info';
+import Mint from './pages/mint/mint';
 import Error from './pages/error/error';
 
 import Header from './components/header/header';
@@ -29,10 +30,10 @@ export default class App extends React.PureComponent {
     }
 
     async init() {
-        if(typeof window.zilPay === 'undefined') {
+        if(typeof await window.zilPay === 'undefined') {
             this.setState({error: true, msg: 'Download and install ZilPay.'});
             return false;
-        } else if(window.zilPay.wallet.isEnable){
+        } else if(await window.zilPay.wallet.isEnable){
             return true;
         } else {
             const isConnected = await window.zilPay.wallet.connect();
@@ -49,12 +50,18 @@ export default class App extends React.PureComponent {
         let isInjected = await this.init();
         if(isInjected) {
             const networkId = await window.zilPay.wallet.net;
-            /// if(networkId !== 'testnet') this.setState({error: true, msg: 'Set network to testnet via ZilPay.'});
+            const zilliqa = await window.zilPay;
+            const address = await window.zilPay.wallet.defaultAccount;
 
-            const api = new Api(window.zilPay);
+            if(networkId !== 'testnet') {
+                this.setState({error: true, msg: 'Set network to testnet via ZilPay.'});
+                return;
+            }
+
+            const api = new Api(zilliqa, address);
             this.setState({
-                zilliqa: window.zilPay,
-                address: window.zilPay.wallet.defaultAccount,
+                zilliqa: zilliqa,
+                address: address,
                 isLoaded: true,
                 api: api
             });
@@ -78,6 +85,7 @@ export default class App extends React.PureComponent {
                 <>
                 <Header />
                 <Switch>
+                    <Route exact path="/mint" render={(props) => <Mint address={this.state.address} api={this.state.api} {...props} />} />
                     <Route exact path="/dashboard" render={(props) => <Dashboard address={this.state.address} api={this.state.api} {...props} />} />
                     <Route exact path="/info/:address/:id" render={(props) => <Info address={this.state.address} api={this.state.api} {...props} />} />
                     <Route render={(props) => <Home address={this.state.address} api={this.state.api} />} />

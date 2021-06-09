@@ -1,41 +1,108 @@
 import sanitizeHtml from 'sanitize-html';
 import { BN, Long, bytes, units } from '@zilliqa-js/util';
-import { toBech32Address } from '@zilliqa-js/crypto';
 
 export default class Api {
-    constructor(zilliqa) {
+    constructor(zilliqa, address) {
         const chainId = 333; // chainId of the developer testnet
         const msgVersion = 1; // current msgVersion
         const VERSION = bytes.pack(chainId, msgVersion);
         const contractAddress = 'zil17l2f9ptu9dqyvyf2m8pf8n3r6telrqaj8tfa25';
 
         this.zilliqa = zilliqa;
+        this.address = address;
         this.version = VERSION;
         this.gasPrice = units.toQa('2000', units.Units.Li); // Gas Price that will be used by all transactions
+        this.nftContractAddress = 'zil108tx9e3pczzjrgs0sr54xstanqwaau9xrpa45p';
     }
 
-    async createUser(nickname, imageCID) {
+    async mint(metadataCID) {
         try {
-            const contract = this.zilliqa.contracts.at(this.contractAddress);
-            const callTx = await contract.call(
-                'GetTokenURI',
-                [],
+            const contract = this.zilliqa.contracts.at(this.nftContractAddress);
+            const callTx = await contract.callWithoutConfirm(
+                'Mint',
+                [
+                    {
+                        vname: 'to',
+                        type: 'ByStr20',
+                        value: `${this.address}`,
+                    },
+                    {
+                        vname: 'token_uri',
+                        type: 'String',
+                        value: metadataCID,
+                    }
+                ],
                 {
                     // amount, gasPrice and gasLimit must be explicitly provided
-                    version: this.VERSION,
+                    version: this.version,
                     amount: new BN(0),
                     gasPrice: this.gasPrice,
                     gasLimit: Long.fromNumber(10000),
                 }
             );
-            console.log(callTx);
-            
+    
+            // check the pending status
+            const pendingStatus = await this.zilliqa.blockchain.getPendingTxn(callTx.id);
+            console.log(`Pending status is: `);
+            console.log(pendingStatus.result);
+    
+            // process confirm
+            console.log(`The transaction id is:`, callTx.id);
+            console.log(`Waiting transaction be confirmed`);
+            const confirmedTxn = await callTx.confirm(callTx.id);
+    
+            console.log(`The transaction status is:`);
+            console.log(confirmedTxn.receipt);
 
             return true;
         } catch (err) {
             console.log(err);
             return false;
         }
+    }
+
+    async burn(nftContractAddress, tokenId) {
+        try {
+            const contract = this.zilliqa.contracts.at(nftContractAddress);
+            const callTx = await contract.callWithoutConfirm(
+                'burn',
+                [
+                    {
+                        vname: 'token_id',
+                        type: 'Uint256',
+                        value: `${tokenId}`,
+                    }
+                ],
+                {
+                    // amount, gasPrice and gasLimit must be explicitly provided
+                    version: this.version,
+                    amount: new BN(0),
+                    gasPrice: this.gasPrice,
+                    gasLimit: Long.fromNumber(10000),
+                }
+            );
+    
+            // check the pending status
+            const pendingStatus = await this.zilliqa.blockchain.getPendingTxn(callTx.id);
+            console.log(`Pending status is: `);
+            console.log(pendingStatus.result);
+    
+            // process confirm
+            console.log(`The transaction id is:`, callTx.id);
+            console.log(`Waiting transaction be confirmed`);
+            const confirmedTxn = await callTx.confirm(callTx.id);
+    
+            console.log(`The transaction status is:`);
+            console.log(confirmedTxn.receipt);
+
+            return true;
+        } catch (err) {
+            console.log(err);
+            return false;
+        }
+    }
+
+    async createUser(nickname, imageCID) {
     }
 
     async getNFTs() {
