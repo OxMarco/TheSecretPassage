@@ -3,7 +3,7 @@ import { Route, Switch } from 'react-router-dom';
 import IpfsRouter from 'ipfs-react-router'
 
 import Home from './pages/home/home';
-import Review from './pages/review/review';
+import Dashboard from './pages/dashboard/dashboard';
 import Info from './pages/info/info';
 import Error from './pages/error/error';
 
@@ -11,7 +11,6 @@ import Header from './components/header/header';
 import Footer from './components/footer/footer';
 import Loader from './components/loader/loader';
 import Api from './components/api/api';
-import Tracker from './components/tracker/tracker';
 
 export default class App extends React.PureComponent {
     constructor(props) {
@@ -20,55 +19,56 @@ export default class App extends React.PureComponent {
         this.state = {
             error: false,
             msg: '',
-            tracker: new Tracker(),
             zilliqa: null,
             address: '',
             api: null,
-            loggedIn: false
+            isLoaded: false
         };
 
         this.init = this.init.bind(this);
     }
 
     async init() {
-        if(window.zilPay.wallet.isEnable){
+        if(typeof window.zilPay === 'undefined') {
+            this.setState({error: true, msg: 'Download and install ZilPay.'});
+            return false;
+        } else if(window.zilPay.wallet.isEnable){
             return true;
         } else {
             const isConnected = await window.zilPay.wallet.connect();
             if (isConnected) {
               return true;
             } else {
-                this.setState({error: true, msg: 'Download or reinstall ZilPay wallet.'});
+                this.setState({error: true, msg: 'Check if ZilPay wallet extension is activated.'});
                 return false;
             }
         } 
     }
 
     async componentDidMount() {
-        while(!await this.init()) {
-            console.log('...initiating wallet...');
+        let isInjected = await this.init();
+        if(isInjected) {
+            const networkId = await window.zilPay.wallet.net;
+            /// if(networkId !== 'testnet') this.setState({error: true, msg: 'Set network to testnet via ZilPay.'});
+
+            const api = new Api(window.zilPay);
+            this.setState({
+                zilliqa: window.zilPay,
+                address: window.zilPay.wallet.defaultAccount,
+                isLoaded: true,
+                api: api
+            });
         }
-
-        const networkId = await window.zilPay.wallet.net;
-        /// if(networkId !== 'testnet') this.setState({error: true, msg: 'Set network to testnet via ZilPay.'});
-
-        const api = new Api(window.zilPay);
-        this.setState({
-            zilliqa: window.zilPay,
-            address: window.zilPay.wallet.defaultAccount.base16,
-            loggedIn: true,
-            api: api
-        });
     }
 
     render() {
-        const { loggedIn, error, msg } = this.state;
+        const {isLoaded, error, msg } = this.state;
 
         if(error)
             return(
                 <Error msg={msg} />
             );
-        else if(!loggedIn)
+        else if(!isLoaded)
             return(
                 <Loader />
             );
@@ -78,9 +78,9 @@ export default class App extends React.PureComponent {
                 <>
                 <Header />
                 <Switch>
-                    <Route exact path="/review/:address/:id" render={(props) => <Review tracker={this.state.tracker} address={this.state.address} web3={this.state.web3} api={this.state.api} userInfo={this.state.userInfo} {...props} />} />
-                    <Route exact path="/info/:address/:id" render={(props) => <Info tracker={this.state.tracker} address={this.state.address} web3={this.state.web3} api={this.state.api} userInfo={this.state.userInfo} {...props} />} />
-                    <Route render={(props) => <Home tracker={this.state.tracker} address={this.state.address} api={this.state.api} />} />
+                    <Route exact path="/dashboard" render={(props) => <Dashboard address={this.state.address} api={this.state.api} {...props} />} />
+                    <Route exact path="/info/:address/:id" render={(props) => <Info address={this.state.address} api={this.state.api} {...props} />} />
+                    <Route render={(props) => <Home address={this.state.address} api={this.state.api} />} />
                 </Switch>
                 <Footer />
                 </>

@@ -11,49 +11,70 @@ export default class Home extends Component {
         this.state = {
             nfts: [],
             show: true,
+            nickname: '',
+            avatar: ''
         }
 
+        this.handleChange = this.handleChange.bind(this);
+        this.handleFileChange = this.handleFileChange.bind(this);
         this.handleClose = this.handleClose.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
     }
 
     async componentDidMount() {
-        this.props.tracker.pageVisited('home');
-
         var nft_data = await this.props.api.getNFT('zil17l2f9ptu9dqyvyf2m8pf8n3r6telrqaj8tfa25');
         this.setState({ nfts: nft_data });
     }
 
-    handleClose() {
+    handleChange = (e) => {
+        const value = e.target.value;
+        this.setState({
+            [e.target.name]: value
+        });
+    }
+
+    handleFileChange = (e) => {
+        this.setState({ avatar: e.target.files[0] });
+    }
+
+    handleClose = () => {
         this.setState({ show: false });
+    }
+
+    handleSubmit = (e) => {
+        e.preventDefault();
+
+        this.setState({ show: false });
+
+        alert(this.state.nickname);
     }
 
     render() {
         return (
             <>
-
-<Modal show={this.state.show} onHide={this.handleClose}>
-        <Modal.Header>
-          <Modal.Title>Welcome, new user!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Create an account before continuing
-        <Form>
-  <Form.Group controlId="nickname">
-    <Form.Control if="nickname" type="text" placeholder="Choose a fancy nickname" required />
-  </Form.Group>
-  <Form.Group controlId="avatar">
-    <Form.Control id="avatar" type="file" label="Pick an avatar image" />
-  </Form.Group>
-  <Button variant="primary" type="submit">
-    Send
-  </Button>
-</Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={this.handleClose}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
+                <Modal show={this.state.show} onHide={this.handleClose}>
+                    <Modal.Header>
+                        <Modal.Title>Welcome! Create an account first.</Modal.Title>   
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form onSubmit={this.handleSubmit}>
+                            <Form.Group controlId="nickname">
+                                <Form.Label>Nickname</Form.Label>
+                                <Form.Control name="nickname" value={this.state.nickname} type="text" max="50" required onChange={this.handleChange} />
+                            </Form.Group>
+                            <br />
+                            <Form.Group controlId="avatar">
+                                <Form.Label>Avatar image</Form.Label>
+                                <Form.File name="avatar" type="file" accept="image/*" required onChange={this.handleFileChange} />
+                            </Form.Group>
+                            <br />
+                            <Button variant="primary" type="submit">
+                                Send
+                            </Button>{' '}
+                            <Button variant="secondary" onClick={this.handleClose}>Close</Button>
+                        </Form>
+                    </Modal.Body>
+                </Modal>
 
                 <main id="main">
                     <section className="section site-portfolio">

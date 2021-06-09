@@ -8,6 +8,7 @@ import {
         RedditShareCount,
         RedditIcon
     } from "react-share";
+import { Modal, Button, Form } from 'react-bootstrap';
 
 export default class Info extends Component {
     constructor(props) {
@@ -15,15 +16,39 @@ export default class Info extends Component {
 
         this.state = {
             nft: null,
+            show: false,
+            review: null
         };
+
+        this.handleChange = this.handleChange.bind(this);
+        this.handleClose = this.handleClose.bind(this);
+        this.handleSubmit = this.handleSubmit.bind(this);
     }
 
     async componentDidMount() {
-        this.props.tracker.pageVisited('info');
-
         var nft_data = await this.props.api.getNFTbyId(this.props.match.params.address, this.props.match.params.id);
         this.setState({ nft: nft_data });
         console.log(this.state.nft)
+    }
+
+
+    handleChange = (e) => {
+        const value = e.target.value;
+        this.setState({
+            [e.target.name]: value
+        });
+    }
+
+    handleSubmit = (e) => {
+        e.preventDefault();
+
+        this.setState({ show: false });
+
+        alert(this.state.nickname);
+    }
+
+    handleClose() {
+        this.setState({ show: false });
     }
 
     render() {
@@ -32,6 +57,32 @@ export default class Info extends Component {
 
         return(
             <>
+                <Modal show={this.state.show} onHide={this.handleClose}>
+                    <Modal.Header>
+                        <Modal.Title>Leave a review</Modal.Title>   
+                    </Modal.Header>
+                    <Modal.Body>
+                        <Form onSubmit={this.handleSubmit}>
+                            <Form.Group controlId="review">
+                            <Form.Label>Rating</Form.Label>
+                            <Form.Control as="select" name="review" required onChange={this.handleChange}>
+                                <option>Choose...</option>
+                                <option value="1">I don't like it</option>
+                                <option value="2">Barely ok</option>
+                                <option value="3">Not bad</option>
+                                <option value="4">Nice</option>
+                                <option value="5">Looks amazing!</option>
+                            </Form.Control>
+                            </Form.Group>
+                            <br />
+                            <Button variant="primary" type="submit">
+                                Send
+                            </Button>{' '}
+                            <Button variant="secondary" onClick={this.handleClose}>Close</Button>
+                        </Form>
+                    </Modal.Body>
+                </Modal>
+
                 <main id="main">
 
                     <section className="section">
@@ -73,7 +124,7 @@ export default class Info extends Component {
                                                 </li>
                                             </ul>
 
-                                            <p className="mb-5"><Link to={"/review/"+this.state.nft.address+"/"+this.state.nft.tokenId} className="readmore">Rate it</Link></p>
+                                            <p className="mb-5"><button onClick={() => this.setState({ show: true })} className="readmore">Rate it</button></p>
 
                                             <div className="mb-5">
                                                 <FacebookShareButton url={shareUrl} quote={this.state.nft.title}>
