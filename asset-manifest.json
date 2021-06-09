@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/TheSecretPassage/static/css/main.fceb248f.chunk.css",
-    "main.js": "/TheSecretPassage/static/js/main.9d064a92.chunk.js",
-    "main.js.map": "/TheSecretPassage/static/js/main.9d064a92.chunk.js.map",
+    "main.js": "/TheSecretPassage/static/js/main.cc76691f.chunk.js",
+    "main.js.map": "/TheSecretPassage/static/js/main.cc76691f.chunk.js.map",
     "runtime-main.js": "/TheSecretPassage/static/js/runtime-main.828b4655.js",
     "runtime-main.js.map": "/TheSecretPassage/static/js/runtime-main.828b4655.js.map",
     "static/js/2.9b90d2f4.chunk.js": "/TheSecretPassage/static/js/2.9b90d2f4.chunk.js",
@@ -17,6 +17,6 @@
     "static/js/runtime-main.828b4655.js",
     "static/js/2.9b90d2f4.chunk.js",
     "static/css/main.fceb248f.chunk.css",
-    "static/js/main.9d064a92.chunk.js"
+    "static/js/main.cc76691f.chunk.js"
   ]
 }
