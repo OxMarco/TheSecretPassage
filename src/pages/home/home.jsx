@@ -65,6 +65,7 @@ export default class Home extends Component {
         const metadataCID = metadata.path;
 
         this.props.api.createUser(metadataCID);
+        this.props.api.configureMinter();
 
         this.setState({ show: false });
     }

@@ -52,6 +52,36 @@ export default class Api {
         }
     }
 
+    async configureMinter() {
+        try {
+            const contract = this.zilliqa.contracts.at(this.nftContractAddress);
+            const callTx = await contract.call(
+                'configureMinter',
+                [
+                    {
+                        vname: 'minter',
+                        type: 'ByStr20',
+                        value: `${this.address.base16}`,
+                    },
+                ],
+                {
+                    // amount, gasPrice and gasLimit must be explicitly provided
+                    version: this.version,
+                    amount: new BN(0),
+                    gasPrice: this.gasPrice,
+                    gasLimit: Long.fromNumber(10000),
+                }
+            );
+            
+            console.log(callTx)
+
+            return true;
+        } catch (err) {
+            console.log(err);
+            return false;
+        }
+    }
+
     async mint(metadataCID) {
         try {
             const contract = this.zilliqa.contracts.at(this.nftContractAddress);

@@ -32,10 +32,10 @@ export default class App extends React.PureComponent {
     }
 
     async init() {
-        /* if(typeof await window.zilPay === 'undefined') {
+        if(typeof await window.zilPay === 'undefined') {
+            console.error(window.zilPay)
             this.setState({error: true, msg: 'Download and install ZilPay.'});
-            return false;
-        } else  */if(await window.zilPay.wallet.isEnable){
+        } else if(await window.zilPay.wallet.isEnable){
             return true;
         } else {
             const isConnected = await window.zilPay.wallet.connect();
