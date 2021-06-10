@@ -14,60 +14,25 @@ export default class Api {
         this.address = address;
         this.version = bytes.pack(chainId, msgVersion);
         this.gasPrice = units.toQa('2000', units.Units.Li); // Gas Price that will be used by all transactions
-        this.nftContractAddress = 'zil129my2q5arawdz8e9765n4n8wn7tvuay9x3ula5';
+        this.nftContractAddress = 'zil188mw6t93q5hnyqgjqjznvrk6atjssxya3l0kf8';
     }
 
-    async createUser(nickname, avatarCID) {
+    async createUser(userDataCID) {
         try {
             const contract = this.zilliqa.contracts.at(this.nftContractAddress);
             const callTx = await contract.call(
-                'addUser',
+                'ConfigureUser',
                 [
                     {
-                        vname: 'user',
+                        vname: 'addr',
                         type: 'ByStr20',
                         value: `${this.address.base16}`,
                     },
                     {
-                        vname: 'nickname',
+                        vname: 'userdata',
                         type: 'String',
-                        value: nickname,
-                    },
-                    {
-                        vname: 'avatar',
-                        type: 'String',
-                        value: `https://ipfs.io/ipfs/${avatarCID}`,
+                        value: `https://ipfs.io/ipfs/${userDataCID}`,
                     }
-                ],
-                {
-                    // amount, gasPrice and gasLimit must be explicitly provided
-                    version: this.version,
-                    amount: new BN(0),
-                    gasPrice: this.gasPrice,
-                    gasLimit: Long.fromNumber(10000),
-                }
-            );
-            
-            console.log(callTx)
-
-            return true;
-        } catch (err) {
-            console.log(err);
-            return false;
-        }
-    }
-
-    async configureMinter() {
-        try {
-            const contract = this.zilliqa.contracts.at(this.nftContractAddress);
-            const callTx = await contract.call(
-                'configureMinter',
-                [
-                    {
-                        vname: 'minter',
-                        type: 'ByStr20',
-                        value: `${this.address.base16}`,
-                    },
                 ],
                 {
                     // amount, gasPrice and gasLimit must be explicitly provided
@@ -163,27 +128,62 @@ export default class Api {
         }
     }
 
-    async createUser(nickname, imageCID) {
-    }
-
     async getNFTs() {
         var storedNfts = [];
 
         const contract = this.zilliqa.contracts.at(this.nftContractAddress);
         const data = await contract.getState();
-        console.log(data)
         const urls = (data.token_uris);
-        for(let i = 2; i <= data.total_supply; i++) {
-            console.log('uri')
-            console.log(urls[i])
+
+        for(let i = 1; i <= data.total_supply; i++) {
             var res = await fetch(urls[i]);
             var d = await res.json();
             d.tokenId = i;
             storedNfts.push(d);
         }
 
-        console.log(storedNfts)
         return storedNfts;
+    }
+
+    async getUsers() {
+        var storedUsers = [];
+
+        const contract = this.zilliqa.contracts.at(this.nftContractAddress);
+        const data = await contract.getState();
+        for (const [ key, value ] of Object.entries(data.users)) {
+            var res = await fetch(value);
+            var user = await res.json();
+            var userObject = {
+                address: String(key).toLowerCase(),
+                nickname: user.nickname,
+                avatar: user.avatar
+            }
+            storedUsers.push(userObject);
+        }
+
+        return storedUsers;
+    }
+
+    async getUserByAddress(address) {
+        const contract = this.zilliqa.contracts.at(this.nftContractAddress);
+        const data = await contract.getState();
+
+        for (const [ key, value ] of Object.entries(data.users)) {
+            if(String(key).toLowerCase() == String(address).toLowerCase()) {
+                var res = await fetch(value);
+                return await res.json();
+            }
+        }
+
+        return undefined;
+    }
+
+    async getReviewById(id) {
+        const contract = this.zilliqa.contracts.at(this.nftContractAddress);
+        const data = await contract.getState();
+        const reviews = data.reviews;
+
+        return reviews[id];
     }
 
     async getNFTbyId(id) {
@@ -195,11 +195,38 @@ export default class Api {
         return await res.json();
     }
 
-    async getReviews(NFTaddress) {
-        return [];
-    }
+    async addReview(tokenID, rating) {
+        try {
+            const contract = this.zilliqa.contracts.at(this.nftContractAddress);
+            const callTx = await contract.call(
+                'AddReview',
+                [
+                    {
+                        vname: 'token_id',
+                        type: 'Uint256',
+                        value: tokenID,
+                    },
+                    {
+                        vname: 'review',
+                        type: 'Uint256',
+                        value: rating,
+                    }
+                ],
+                {
+                    // amount, gasPrice and gasLimit must be explicitly provided
+                    version: this.version,
+                    amount: new BN(0),
+                    gasPrice: this.gasPrice,
+                    gasLimit: Long.fromNumber(10000),
+                }
+            );
+            
+            console.log(callTx)
 
-    async addReview(NFTaddress, rating) {
-        return true;
+            return true;
+        } catch (err) {
+            console.log(err);
+            return false;
+        }
     }
 }

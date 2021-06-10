@@ -16,7 +16,7 @@ export default class Info extends Component {
         this.state = {
             nft: null,
             show: false,
-            review: null
+            rating: null
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -25,9 +25,13 @@ export default class Info extends Component {
     }
 
     async componentDidMount() {
+        var rating = await this.props.api.getReviewById(this.props.match.params.id);
         var nft_data = await this.props.api.getNFTbyId(this.props.match.params.id);
+        var author = await this.props.api.getUserByAddress(nft_data.author);
+        nft_data.nickname = author.nickname;
+        nft_data.rating = rating;
+        console.log(rating)
         this.setState({ nft: nft_data });
-        console.log(this.state.nft)
     }
 
 
@@ -38,12 +42,20 @@ export default class Info extends Component {
         });
     }
 
-    handleSubmit = (e) => {
+    handleSubmit = async (e) => {
         e.preventDefault();
 
         this.setState({ show: false });
+        
+        var newRating;
+        if(this.state.nft.rating > 0)
+            newRating = (this.state.nft.rating + this.state.rating)/2;
+        else
+            newRating = this.state.rating;
 
-        alert(this.state.nickname);
+        await this.props.api.addReview(this.props.match.params.id, newRating);
+
+        this.setState({ show: false });
     }
 
     handleClose() {
@@ -53,6 +65,16 @@ export default class Info extends Component {
     render() {
 
         const shareUrl = window.location.href;
+        var stars = [];
+
+        if(this.state.nft?.rating > 0) {
+            for (var i=0; i<this.state.nft.rating; i++) {
+                stars.push(<span key={i} className="bi bi-star-fill"></span>);
+            }
+            for (var i=this.state.nft.rating; i<5; i++) {
+                stars.push(<span key={i+100} className="bi bi-star"></span>);
+            }
+        }
 
         return(
             <>
@@ -62,9 +84,9 @@ export default class Info extends Component {
                     </Modal.Header>
                     <Modal.Body>
                         <Form onSubmit={this.handleSubmit}>
-                            <Form.Group controlId="review">
+                            <Form.Group controlId="rating">
                             <Form.Label>Rating</Form.Label>
-                            <Form.Control as="select" name="review" required onChange={this.handleChange}>
+                            <Form.Control as="select" name="rating" required onChange={this.handleChange}>
                                 <option>Choose...</option>
                                 <option value="1">I don't like it</option>
                                 <option value="2">Barely ok</option>
@@ -92,7 +114,7 @@ export default class Info extends Component {
                             <div className="container">
                                 <div className="row align-items-stretch">
                                     <div className="col-md-6 ml-auto" data-aos="fade-up">
-                                        <img src={this.state.nft.image} alt="Image" className="img-fluid" />
+                                        <img src={this.state.nft.image} alt="NFT media image" className="img-fluid" />
                                     </div>
                                     
                                     <div className="col-md-3 ml-auto" data-aos="fade-up" data-aos-delay="100">
@@ -107,21 +129,21 @@ export default class Info extends Component {
                                             <h4 className="h4 mb-3">Properties</h4>
                                             <ul className="list-unstyled list-line mb-5">
                                                 <li><i>Category:</i>&nbsp;{this.state.nft.category}</li>
-                                                <li><i>Author:</i>&nbsp;{this.state.nft.author}</li>
+                                                <li><i>Author:</i>&nbsp;{this.state.nft.nickname != null ? this.state.nft.nickname : this.state.nft.author}</li>
                                                 <li><i>Resellable:</i>&nbsp;{this.state.nft.resellable ? "Yes" : "No"}</li>
                                                 <li><i>Copyright Transfer:</i>&nbsp;{this.state.nft.copyright_transfer ? "Yes" : "No"}</li>
                                             </ul>
 
-                                            <h4 className="h4 mb-3">Rating</h4>
-                                            <ul className="list-unstyled">
-                                                <li className="mb-3">
-                                                    <span className="bi bi-star-fill"></span>
-                                                    <span className="bi bi-star-fill"></span>
-                                                    <span className="bi bi-star-fill"></span>
-                                                    <span className="bi bi-star"></span>
-                                                    <span className="bi bi-star"></span>
-                                                </li>
-                                            </ul>
+                                            {this.state.nft.rating > 0 &&
+                                            <>
+                                                <h4 className="h4 mb-3">Rating</h4>
+                                                <ul className="list-unstyled">
+                                                    <li className="mb-3">
+                                                        {stars}
+                                                    </li>
+                                                </ul>
+                                            </>
+                                            }
 
                                             <p className="mb-5"><button onClick={() => this.setState({ show: true })} className="readmore">Rate it</button></p>
 

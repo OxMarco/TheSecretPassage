@@ -9,8 +9,9 @@ export default class Home extends Component {
         super(props);
 
         this.state = {
+            users: [],
             nfts: [],
-            show: true,
+            show: false,
             nickname: '',
             avatar: ''
         }
@@ -24,6 +25,12 @@ export default class Home extends Component {
     async componentDidMount() {
         var nft_data = await this.props.api.getNFTs();
         this.setState({ nfts: nft_data });
+
+        var users = await this.props.api.getUsers();
+        this.setState({ users: users });
+        var user = users.filter((u) => u.address === String(this.props.address.base16).toLowerCase());
+        console.log(user)
+        if(user === undefined) this.setState({ show: true });
     }
 
     handleChange = (e) => {
@@ -49,9 +56,17 @@ export default class Home extends Component {
         });
         const imageCID = image.path;
 
-        this.setState({ show: false });
+        const data = JSON.stringify({ 
+            nickname: this.state.nickname,
+            avatar: `https://ipfs.io/ipfs/${imageCID}`,
+        });
 
-        alert(this.state.nickname);
+        const metadata = await this.props.ipfs.add(data);
+        const metadataCID = metadata.path;
+
+        this.props.api.createUser(metadataCID);
+
+        this.setState({ show: false });
     }
 
     render() {
@@ -103,7 +118,6 @@ export default class Home extends Component {
                             {
                             this.state.nfts &&
                             this.state.nfts
-                                .filter(nft => nft.author !== this.props.address.base16)
                                 .map((nft) => <NFT key={nft.tokenId} param={nft} />
                             )}
 
@@ -144,7 +158,31 @@ export default class Home extends Component {
                         </div>
                     </section>
 
-                    <Artists />
+                    <section className="section pt-0">
+                        <div className="container">
+
+                            <div className="testimonials-slider swiper-container" data-aos="fade-up" data-aos-delay="100">
+                                <div className="swiper-wrapper">
+                                    {(this.state.users).map((user) =>
+                                    <div className="swiper-slide" key={user.address}>
+                                        <div className="testimonial-wrap">
+                                            <div className="testimonial">
+                                                <img src={user.avatar} alt="author profile avatar" className="img-fluid" />
+                                                <blockquote>
+                                                    <p>{user.nickname}</p>
+                                                </blockquote>
+                                                <p>{user.address}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    )}
+
+                                </div>
+                                <div className="swiper-pagination"></div>
+                            </div>
+
+                        </div>
+                    </section>
                 
                 </main>
             </>

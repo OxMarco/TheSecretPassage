@@ -4,7 +4,7 @@ scilla_version 0
 (*               Associated library                *)
 (***************************************************)
 import BoolUtils PairUtils ListUtils
-library NonfungibleToken
+library TheSecretPassage
 
 (* User-defined ADTs *)
 type Dummy =
@@ -90,7 +90,7 @@ let make_error =
 (*             The contract definition             *)
 (***************************************************)
 
-contract NonfungibleToken
+contract TheSecretPassage
 (
   contract_owner: ByStr20,
   name : String,
@@ -302,12 +302,6 @@ transition ReviewsOf(tokenId: Uint256)
   send msgs
 end
 
-transition addReview(tokenId: Uint256, review_value: Uint256)
-  some_review <- reviews[tokenId];
-  review = get_review some_review;
-  reviews[tokenId] = builtin add review one
-end
-
 (* @dev: Get total supply of NFTs minted *)
 transition TotalSupply()
   current_supply <- total_supply;
@@ -432,6 +426,12 @@ transition ConfigureUser(addr: ByStr20, userdata: String)
     e = {_eventname: "AddUserSuccess"; user: addr};
     event e
   end
+end
+
+transition AddReview(token_id: Uint256, review: Uint256)
+  reviews[token_id] := review;
+  e = {_eventname: "AddReviewSuccess"; token_id: review};
+  event e
 end
 
 procedure Minting(input_pair: Pair ByStr20 String)
@@ -617,10 +617,6 @@ transition donate_to_us(token_id: Uint256, donation_amount: Uint128)
     send msgs
 end
 
-
-
-
-
 (* @dev: Transfer the ownership of a given token_id to another address. approved_spender or operator only transition. *)
 (* @param: to       - Recipient address for the NFT                                                                   *)
 (* @param: token_id - Unique ID of the NFT to be transferred                                                          *)
@@ -650,6 +646,5 @@ transition TransferFrom(to: ByStr20, token_id: Uint256)
     msgs = two_msgs msg_to_recipient msg_to_sender;
     send msgs
   end
-
 
 end
