@@ -1,9 +1,4 @@
-import sanitizeHtml from 'sanitize-html';
 import { BN, Long, bytes, units } from '@zilliqa-js/util';
-const {
-    toBech32Address,
-    getAddressFromPrivateKey,
-} = require('@zilliqa-js/crypto');
 
 export default class Api {
     constructor(zilliqa, address) {
@@ -56,7 +51,7 @@ export default class Api {
         try {
             const contract = this.zilliqa.contracts.at(this.nftContractAddress);
             const callTx = await contract.call(
-                'configureMinter',
+                'ConfigureMinter',
                 [
                     {
                         vname: 'minter',
@@ -180,15 +175,12 @@ export default class Api {
 
         const contract = this.zilliqa.contracts.at(this.nftContractAddress);
         const data = await contract.getState();
+        console.log(data)
         for (const [ key, value ] of Object.entries(data.users)) {
             var res = await fetch(value);
             var user = await res.json();
-            var userObject = {
-                address: String(key).toLowerCase(),
-                nickname: user.nickname,
-                avatar: user.avatar
-            }
-            storedUsers.push(userObject);
+            user.address = String(key).toLowerCase();
+            storedUsers.push(user);
         }
 
         return storedUsers;
@@ -199,7 +191,7 @@ export default class Api {
         const data = await contract.getState();
 
         for (const [ key, value ] of Object.entries(data.users)) {
-            if(String(key).toLowerCase() == String(address).toLowerCase()) {
+            if(String(key).toLowerCase() === String(address).toLowerCase()) {
                 var res = await fetch(value);
                 return await res.json();
             }
@@ -213,7 +205,7 @@ export default class Api {
         const data = await contract.getState();
         const reviews = data.reviews;
 
-        return reviews[id];
+        return parseInt(reviews[id]);
     }
 
     async getNFTbyId(id) {

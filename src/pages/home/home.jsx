@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import NFT from '../../components/nft/nft';
-import Artists from '../../components/artists/artists';
 import { Modal, Button, Form } from 'react-bootstrap';
 
 export default class Home extends Component {
@@ -28,9 +27,15 @@ export default class Home extends Component {
 
         var users = await this.props.api.getUsers();
         this.setState({ users: users });
-        var user = users.filter((u) => u.address === String(this.props.address.base16).toLowerCase());
-        console.log(user)
-        if(user === undefined) this.setState({ show: true });
+        console.log(users)
+        var my_user = undefined;
+        for(var i = 0; i < users.length; i++) {
+            console.log(users[i])
+            if(users[i].address === String(this.props.address.base16).toLowerCase())
+                my_user = users[i];
+        }
+        console.log(my_user)
+        if(my_user === undefined) this.setState({ show: true });
     }
 
     handleChange = (e) => {

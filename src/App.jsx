@@ -27,12 +27,10 @@ export default class App extends React.PureComponent {
             api: null,
             isLoaded: false
         };
-
-        this.init = this.init.bind(this);
     }
 
     async init() {
-        if(typeof await window.zilPay === 'undefined') {
+        if(typeof window.zilPay === 'undefined') {
             console.error(window.zilPay)
             this.setState({error: true, msg: 'Download and install ZilPay.'});
         } else if(await window.zilPay.wallet.isEnable){
@@ -45,7 +43,7 @@ export default class App extends React.PureComponent {
                 this.setState({error: true, msg: 'Check if ZilPay wallet extension is activated.'});
                 return false;
             }
-        } 
+        }
     }
 
     async componentDidMount() {

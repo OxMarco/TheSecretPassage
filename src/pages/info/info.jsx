@@ -28,7 +28,7 @@ export default class Info extends Component {
         var rating = await this.props.api.getReviewById(this.props.match.params.id);
         var nft_data = await this.props.api.getNFTbyId(this.props.match.params.id);
         var author = await this.props.api.getUserByAddress(nft_data.author);
-        nft_data.nickname = author.nickname;
+        if(author !== undefined) nft_data.nickname = author.nickname;
         nft_data.rating = rating;
         console.log(rating)
         this.setState({ nft: nft_data });
@@ -48,12 +48,15 @@ export default class Info extends Component {
         this.setState({ show: false });
         
         var newRating;
-        if(this.state.nft.rating > 0)
-            newRating = (this.state.nft.rating + this.state.rating)/2;
-        else
-            newRating = this.state.rating;
+        console.log(this.state.rating)
+        console.log(this.state.nft.rating)
 
-        await this.props.api.addReview(this.props.match.params.id, newRating);
+        if(this.state.nft.rating > 0)
+            newRating = (this.state.nft.rating + parseInt(this.state.rating))/2;
+        else
+            newRating = parseInt(this.state.rating);
+
+        await this.props.api.addReview(this.props.match.params.id, Math.round(newRating));
 
         this.setState({ show: false });
     }
@@ -71,8 +74,8 @@ export default class Info extends Component {
             for (var i=0; i<this.state.nft.rating; i++) {
                 stars.push(<span key={i} className="bi bi-star-fill"></span>);
             }
-            for (var i=this.state.nft.rating; i<5; i++) {
-                stars.push(<span key={i+100} className="bi bi-star"></span>);
+            for (var j=this.state.nft.rating; j<5; j++) {
+                stars.push(<span key={j+100} className="bi bi-star"></span>);
             }
         }
 
@@ -108,13 +111,19 @@ export default class Info extends Component {
 
                     <section className="section">
 
-                    {this.state.nft && 
+                    {!this.state.nft &&
+                    <div className="container">
+                        <h1>Loading...</h1>
+                    </div>
+                    }
+
+                    {this.state.nft &&
 
                         <div className="site-section pb-0">
                             <div className="container">
                                 <div className="row align-items-stretch">
                                     <div className="col-md-6 ml-auto" data-aos="fade-up">
-                                        <img src={this.state.nft.image} alt="NFT media image" className="img-fluid" />
+                                        <img src={this.state.nft.image} alt="NFT media" className="img-fluid" />
                                     </div>
                                     
                                     <div className="col-md-3 ml-auto" data-aos="fade-up" data-aos-delay="100">
@@ -129,7 +138,7 @@ export default class Info extends Component {
                                             <h4 className="h4 mb-3">Properties</h4>
                                             <ul className="list-unstyled list-line mb-5">
                                                 <li><i>Category:</i>&nbsp;{this.state.nft.category}</li>
-                                                <li><i>Author:</i>&nbsp;{this.state.nft.nickname != null ? this.state.nft.nickname : this.state.nft.author}</li>
+                                                <li><i>Author:</i>&nbsp;{this.state.nft?.nickname ? this.state.nft.nickname : this.state.nft.author}</li>
                                                 <li><i>Resellable:</i>&nbsp;{this.state.nft.resellable ? "Yes" : "No"}</li>
                                                 <li><i>Copyright Transfer:</i>&nbsp;{this.state.nft.copyright_transfer ? "Yes" : "No"}</li>
                                             </ul>

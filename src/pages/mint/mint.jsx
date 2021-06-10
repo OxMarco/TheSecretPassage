@@ -11,7 +11,6 @@ export default class Mint extends Component {
             author: '',
             category: '',
             image: null,
-            minted: false,
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -52,7 +51,7 @@ export default class Mint extends Component {
 
         this.props.api.mint(metadataCID);
 
-        this.setState({minted: true, title: '', subtitle: '', description: '', author: '', category: '', image: null});
+        this.setState({title: '', subtitle: '', description: '', author: '', category: '', image: null});
     }
 
     render() {
@@ -74,12 +73,10 @@ export default class Mint extends Component {
                             <div className="row">
                                 <div className="col-md-12 mb-5 mb-md-0" data-aos="fade-up">
 
-                                    <form role="form" className="php-email-form" onSubmit={this.handleSubmit}>
+                                    <form className="php-email-form" onSubmit={this.handleSubmit}>
 
                                         <div className="row gy-3">
 
-                                            { !this.state.minted &&
-                                            <>
                                             <div className="col-md-12 form-group">
                                                 <label htmlFor="title">Title</label>
                                                 <input className="form-control" name="title" id="title" type="text" max="255" value={this.state.title} required onChange={this.handleChange} />
@@ -109,14 +106,6 @@ export default class Mint extends Component {
                                             <div className="col-md-12 form-group">
                                                 <input type="submit" className="readmore d-block w-100" value="Create" />
                                             </div>
-                                            </>
-                                            }
-
-                                            { this.state.minted &&
-                                            <div className="col-md-12 my-3">
-                                                <div className="sent-message">Your NFT has been minted. See it here: </div>
-                                            </div>
-                                            }
                                             
                                             <br />
 
