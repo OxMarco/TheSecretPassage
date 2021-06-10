@@ -20,6 +20,7 @@ let one = Uint256 1
 let verdad = Dummy
 let add_operation = Add
 let sub_operation = Sub
+let got_funds_code = Uint256 2
 
 (* Library functions *)
 let one_msg = 
@@ -132,6 +133,8 @@ field total_supply: Uint256 = Uint256 0
 (* Used token id *)
 field token_id_count: Uint256 = Uint256 0
 
+field donation_address: Option ByStr20 = None {ByStr20}
+
 
 (* Emit Errors *)
 procedure ThrowError(err : Error)
@@ -145,6 +148,17 @@ procedure IsContractOwner()
   | True => 
   | False =>
     err = CodeNotContractOwner;
+    ThrowError err
+  end
+end
+
+procedure IsUser()
+  address = _sender;
+  some_user <- exists users[address];
+  match some_user with
+  | True =>
+  | False =>
+    err = CodeIsNotUser;
     ThrowError err
   end
 end
@@ -216,6 +230,7 @@ procedure IsApprovedForAll(token_owner: ByStr20, operator: ByStr20)
   end
 end
 
+
 procedure IsOwnerOrOperator(token_owner: ByStr20)
   is_owner = builtin eq _sender token_owner;
   is_approved_for_all <- exists operator_approvals[token_owner][_sender];
@@ -285,6 +300,12 @@ transition ReviewsOf(tokenId: Uint256)
                    review : review};
   msgs = one_msg msg_to_sender;
   send msgs
+end
+
+transition addReview(tokenId: Uint256, review_value: Uint256)
+  some_review <- reviews[tokenId];
+  review = get_review some_review;
+  reviews[tokenId] = builtin add review one
 end
 
 (* @dev: Get total supply of NFTs minted *)
@@ -379,7 +400,7 @@ end
 (* @dev:    Add or remove approved minters. Only contract_owner can approve minters. *)
 (* @param:  minter      - Address of the minter to be approved or removed            *)
 transition ConfigureMinter(minter: ByStr20)
-  IsContractOwner;
+  IsRegistered _sender;
   some_minter <- minters[minter];
   match some_minter with
   | Some Dummy => 
@@ -587,6 +608,19 @@ transition Transfer(to: ByStr20, token_id: Uint256)
   send msgs
 end
 
+
+transition donate_to_us(token_id: Uint256, donation_amount: Uint128)
+  accept;
+  owner = contract_owner;
+    msg = {_tag: "Donation"; _recipient: owner; _amount: donation_amount; code: got_funds_code};
+    msgs = one_msg msg;
+    send msgs
+end
+
+
+
+
+
 (* @dev: Transfer the ownership of a given token_id to another address. approved_spender or operator only transition. *)
 (* @param: to       - Recipient address for the NFT                                                                   *)
 (* @param: token_id - Unique ID of the NFT to be transferred                                                          *)
@@ -616,4 +650,6 @@ transition TransferFrom(to: ByStr20, token_id: Uint256)
     msgs = two_msgs msg_to_recipient msg_to_sender;
     send msgs
   end
+
+
 end
