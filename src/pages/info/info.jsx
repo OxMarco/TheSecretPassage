@@ -25,7 +25,7 @@ export default class Info extends Component {
     }
 
     async componentDidMount() {
-        var nft_data = await this.props.api.getNFTbyId(this.props.match.params.address, this.props.match.params.id);
+        var nft_data = await this.props.api.getNFTbyId(this.props.match.params.id);
         this.setState({ nft: nft_data });
         console.log(this.state.nft)
     }
@@ -106,15 +106,15 @@ export default class Info extends Component {
 
                                             <h4 className="h4 mb-3">Properties</h4>
                                             <ul className="list-unstyled list-line mb-5">
-                                                <li><i>TokenID:</i>&nbsp;{this.state.nft.tokenId}</li>
-                                                <li><i>Author:</i>&nbsp;{this.state.nft.original_creator}</li>
+                                                <li><i>Category:</i>&nbsp;{this.state.nft.category}</li>
+                                                <li><i>Author:</i>&nbsp;{this.state.nft.author}</li>
                                                 <li><i>Resellable:</i>&nbsp;{this.state.nft.resellable ? "Yes" : "No"}</li>
                                                 <li><i>Copyright Transfer:</i>&nbsp;{this.state.nft.copyright_transfer ? "Yes" : "No"}</li>
                                             </ul>
 
                                             <h4 className="h4 mb-3">Rating</h4>
-                                            <ul class="list-unstyled">
-                                                <li class="mb-3">
+                                            <ul className="list-unstyled">
+                                                <li className="mb-3">
                                                     <span className="bi bi-star-fill"></span>
                                                     <span className="bi bi-star-fill"></span>
                                                     <span className="bi bi-star-fill"></span>

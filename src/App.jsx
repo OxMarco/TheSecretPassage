@@ -1,6 +1,7 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
-import IpfsRouter from 'ipfs-react-router'
+import IpfsRouter from 'ipfs-react-router';
+import IpfsHttpClient from 'ipfs-http-client';
 
 import Home from './pages/home/home';
 import Dashboard from './pages/dashboard/dashboard';
@@ -22,6 +23,7 @@ export default class App extends React.PureComponent {
             msg: '',
             zilliqa: null,
             address: '',
+            ipfs: null,
             api: null,
             isLoaded: false
         };
@@ -30,10 +32,10 @@ export default class App extends React.PureComponent {
     }
 
     async init() {
-        if(typeof await window.zilPay === 'undefined') {
+        /* if(typeof await window.zilPay === 'undefined') {
             this.setState({error: true, msg: 'Download and install ZilPay.'});
             return false;
-        } else if(await window.zilPay.wallet.isEnable){
+        } else  */if(await window.zilPay.wallet.isEnable){
             return true;
         } else {
             const isConnected = await window.zilPay.wallet.connect();
@@ -59,10 +61,17 @@ export default class App extends React.PureComponent {
             }
 
             const api = new Api(zilliqa, address);
+            const ipfs = IpfsHttpClient({
+                host: "ipfs.infura.io",
+                port: "5001",
+                protocol: "https",
+            });
+
             this.setState({
                 zilliqa: zilliqa,
                 address: address,
                 isLoaded: true,
+                ipfs: ipfs,
                 api: api
             });
         }
@@ -85,10 +94,10 @@ export default class App extends React.PureComponent {
                 <>
                 <Header />
                 <Switch>
-                    <Route exact path="/mint" render={(props) => <Mint address={this.state.address} api={this.state.api} {...props} />} />
-                    <Route exact path="/dashboard" render={(props) => <Dashboard address={this.state.address} api={this.state.api} {...props} />} />
-                    <Route exact path="/info/:address/:id" render={(props) => <Info address={this.state.address} api={this.state.api} {...props} />} />
-                    <Route render={(props) => <Home address={this.state.address} api={this.state.api} />} />
+                    <Route exact path="/mint" render={(props) => <Mint address={this.state.address} api={this.state.api} ipfs={this.state.ipfs} {...props} />} />
+                    <Route exact path="/dashboard" render={(props) => <Dashboard address={this.state.address} api={this.state.api} ipfs={this.state.ipfs} {...props} />} />
+                    <Route exact path="/info/:id" render={(props) => <Info address={this.state.address} api={this.state.api} ipfs={this.state.ipfs} {...props} />} />
+                    <Route render={(props) => <Home address={this.state.address} api={this.state.api} ipfs={this.state.ipfs} {...props} />} />
                 </Switch>
                 <Footer />
                 </>

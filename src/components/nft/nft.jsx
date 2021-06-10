@@ -16,7 +16,7 @@ export default class NFT extends Component {
         <>
             {this.state.nft &&
             <div className={"item "+this.state.nft.category.toLowerCase()+" col-sm-6 col-md-4 col-lg-4 mb-4"}>
-                <Link to={"/info/"+this.state.nft.address+"/"+this.state.nft.tokenId} className="item-wrap fancybox">
+                <Link to={"/info/"+this.state.nft.tokenId} className="item-wrap fancybox">
                     <div className="work-info">
                         <h3>{this.state.nft.name}</h3>
                         <span>{this.state.nft.category}</span>

@@ -8,7 +8,10 @@ export default class Mint extends Component {
             title: '',
             subtitle: '',
             description: '',
-            image: null
+            author: '',
+            category: '',
+            image: null,
+            minted: false,
         };
 
         this.handleChange = this.handleChange.bind(this);
@@ -27,8 +30,29 @@ export default class Mint extends Component {
         this.setState({ image: e.target.files[0] });
     }
 
-    handleSubmit = (e) => {
+    handleSubmit = async (e) => {
         e.preventDefault();
+
+        const image = await this.props.ipfs.add(this.state.image, {
+            progress: (prog) => console.log(prog),
+        });
+        const imageCID = image.path;
+
+        const data = JSON.stringify({ 
+            title: this.state.title,
+            subtitle: this.state.subtitle,
+            description: this.state.description,
+            author: this.props.address.base16,
+            category: this.state.category,
+            image: `https://ipfs.io/ipfs/${imageCID}`,
+        });
+
+        const metadata = await this.props.ipfs.add(data);
+        const metadataCID = metadata.path;
+
+        this.props.api.mint(metadataCID);
+
+        this.setState({minted: true, title: '', subtitle: '', description: '', author: '', category: '', image: null});
     }
 
     render() {
@@ -53,6 +77,9 @@ export default class Mint extends Component {
                                     <form role="form" className="php-email-form" onSubmit={this.handleSubmit}>
 
                                         <div className="row gy-3">
+
+                                            { !this.state.minted &&
+                                            <>
                                             <div className="col-md-12 form-group">
                                                 <label htmlFor="title">Title</label>
                                                 <input className="form-control" name="title" id="title" type="text" max="255" value={this.state.title} required onChange={this.handleChange} />
@@ -63,20 +90,36 @@ export default class Mint extends Component {
                                             </div>
                                             <div className="col-md-12 form-group">
                                                 <label htmlFor="description">Description</label>
-                                                <textarea className="form-control" name="description" id="description" cols="30" rows="10" required onChange={this.handleChange}>{this.state.description}</textarea>
+                                                <textarea className="form-control" name="description" id="description" cols="30" rows="10" value={this.state.description} required onChange={this.handleChange}></textarea>
+                                            </div>
+                                            <div className="col-md-12 form-group">
+                                                <label htmlFor="category">Category</label>
+                                                <select className="form-control" name="category" id="category" required onChange={this.handleChange}>
+                                                    <option>Choose...</option>
+                                                    <option value="media">Media</option>
+                                                    <option value="artwork">Artwork</option>
+                                                    <option value="images">Images</option>
+                                                    <option value="collectibles">Collectibles</option>
+                                                </select>
                                             </div>
                                             <div className="col-md-12 form-group">
                                                 <label htmlFor="image">Image</label>
                                                 <input className="form-control" name="image" id="image" type="file" accept="image/*" required onChange={this.handleFileChange} />
                                             </div>
+                                            <div className="col-md-12 form-group">
+                                                <input type="submit" className="readmore d-block w-100" value="Create" />
+                                            </div>
+                                            </>
+                                            }
 
+                                            { this.state.minted &&
                                             <div className="col-md-12 my-3">
                                                 <div className="sent-message">Your NFT has been minted. See it here: </div>
                                             </div>
+                                            }
+                                            
+                                            <br />
 
-                                            <div className="col-md-6 mt-0 form-group">
-                                                <input type="submit" className="readmore d-block w-100" value="Create" />
-                                            </div>
                                         </div>
 
                                     </form>

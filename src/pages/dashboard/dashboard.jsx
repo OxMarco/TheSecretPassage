@@ -14,7 +14,7 @@ export default class Dashboard extends Component {
     }
 
     async componentDidMount() {
-        var nft_data = await this.props.api.getNFT('zil17l2f9ptu9dqyvyf2m8pf8n3r6telrqaj8tfa25');
+        var nft_data = await this.props.api.getNFTs();
         this.setState({ nfts: nft_data });
     }
 

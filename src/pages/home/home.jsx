@@ -22,7 +22,7 @@ export default class Home extends Component {
     }
 
     async componentDidMount() {
-        var nft_data = await this.props.api.getNFT('zil17l2f9ptu9dqyvyf2m8pf8n3r6telrqaj8tfa25');
+        var nft_data = await this.props.api.getNFTs();
         this.setState({ nfts: nft_data });
     }
 
@@ -41,8 +41,13 @@ export default class Home extends Component {
         this.setState({ show: false });
     }
 
-    handleSubmit = (e) => {
+    handleSubmit = async (e) => {
         e.preventDefault();
+
+        const image = await this.props.ipfs.add(this.state.avatar, {
+            progress: (prog) => console.log(prog),
+        });
+        const imageCID = image.path;
 
         this.setState({ show: false });
 
@@ -98,7 +103,7 @@ export default class Home extends Component {
                             {
                             this.state.nfts &&
                             this.state.nfts
-                                .filter(nft => nft.original_creator !== this.props.address)
+                                .filter(nft => nft.author !== this.props.address.base16)
                                 .map((nft) => <NFT key={nft.tokenId} param={nft} />
                             )}
 
