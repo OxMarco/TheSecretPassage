@@ -55,9 +55,9 @@ export default class Info extends Component {
         console.log(this.state.nft.rating)
 
         if(this.state.nft.rating > 0)
-            newRating = (this.state.nft.rating + parseInt(this.state.rating))/2;
+            newRating = (this.state.nft.rating + (this.state.rating))/2;
         else
-            newRating = parseInt(this.state.rating);
+            newRating = (this.state.rating);
 
         await this.props.api.addReview(this.props.match.params.id, Math.round(newRating));
 

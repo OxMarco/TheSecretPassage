@@ -27,14 +27,11 @@ export default class Home extends Component {
 
         var users = await this.props.api.getUsers();
         this.setState({ users: users });
-        console.log(users)
         var my_user = undefined;
         for(var i = 0; i < users.length; i++) {
-            console.log(users[i])
             if(users[i].address === String(this.props.address.base16).toLowerCase())
                 my_user = users[i];
         }
-        console.log(my_user)
         if(my_user === undefined) this.setState({ show: true });
     }
 
