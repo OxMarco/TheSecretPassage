@@ -70,7 +70,6 @@ export default class Home extends Component {
         const metadataCID = metadata.path;
 
         this.props.api.createUser(metadataCID);
-        this.props.api.configureMinter();
 
         this.setState({ show: false });
     }
@@ -169,7 +168,8 @@ export default class Home extends Component {
 
                             <div className="testimonials-slider swiper-container" data-aos="fade-up" data-aos-delay="100">
                                 <div className="swiper-wrapper">
-                                    {(this.state.users).map((user) =>
+
+                                    {(this.state.users).sort(() => Math.random() - 0.5).map((user) =>
                                     <div className="swiper-slide" key={user.address}>
                                         <div className="testimonial-wrap">
                                             <div className="testimonial">
@@ -177,7 +177,7 @@ export default class Home extends Component {
                                                 <blockquote>
                                                     <p>{user.nickname}</p>
                                                 </blockquote>
-                                                <p>{user.address}</p>
+                                                <p>- {user.address}</p>
                                             </div>
                                         </div>
                                     </div>

@@ -18,6 +18,11 @@ export default class Mint extends Component {
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
+    async componentDidMount() {
+        var res = await this.props.api.isMinter(this.props.address.base16);
+        if(!res) this.props.api.configureMinter();
+    }
+
     handleChange = (e) => {
         const value = e.target.value;
         this.setState({

@@ -16,6 +16,7 @@ export default class Info extends Component {
         this.state = {
             nft: null,
             show: false,
+            delete: false,
             rating: null
         };
 
@@ -32,6 +33,8 @@ export default class Info extends Component {
         nft_data.rating = rating;
         console.log(rating)
         this.setState({ nft: nft_data });
+
+        if(this.state.nft.author === this.props.address.base16) this.setState({ delete: true });
     }
 
 
@@ -63,6 +66,10 @@ export default class Info extends Component {
 
     handleClose() {
         this.setState({ show: false });
+    }
+
+    async delete() {
+        await this.props.api.burn(this.props.match.params.id);
     }
 
     render() {
@@ -154,14 +161,21 @@ export default class Info extends Component {
                                             </>
                                             }
 
-                                            <p className="mb-5"><button onClick={() => this.setState({ show: true })} className="readmore">Rate it</button></p>
+                                            <p className="mb-5">
+                                                {this.state.delete &&
+                                                <button onClick={() => this.delete()} className="readmore">Burn</button>
+                                                } &nbsp;
+                                                <button onClick={() => this.setState({ show: true })} className="readmore">Leave Feedback</button>
+                                                
+
+                                            </p>
 
                                             <div className="mb-5">
                                                 <FacebookShareButton url={shareUrl} quote={this.state.nft.title}>
                                                     <FacebookIcon size={32} round />
                                                 </FacebookShareButton>
                                                 <FacebookShareCount url={shareUrl} />
-                    
+                                                &nbsp;
                                                 <RedditShareButton url={shareUrl} title={this.state.nft.title} windowWidth={660} windowHeight={460}>
                                                     <RedditIcon size={32} round />
                                                 </RedditShareButton>
