@@ -9,7 +9,7 @@
 <br />
 <p align="center">
   <a href="https://github.com/grcasanova/TheSecretPassage">
-    <img src="images/logo.png" alt="Logo" width="100" height="162">
+    <img src="images/logo.png" alt="Logo" width="160" height="160">
   </a>
 
   <h3 align="center">TheSecretPassage.</h3>
