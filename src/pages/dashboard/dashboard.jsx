@@ -61,6 +61,7 @@ export default class Dashboard extends Component {
                             {
                             this.state.nfts &&
                             this.state.nfts
+                                .filter((nft) => nft.author === this.props.address.base16)
                                 .map((nft) => <NFT key={nft.tokenId} param={nft} />
                             )}
 
